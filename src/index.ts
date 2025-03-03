@@ -1,3 +1,6 @@
+// I intentionally import each modules separately instead of reexporting them with index.ts
+// https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/
+
 import BigNumber from "bignumber.js";
 import { injectCustomerRepo } from "./lib/allocateFunds";
 import { CustomerRepository } from "./repositories/CustomerRepository";
@@ -41,4 +44,17 @@ const deposits = [
 // Maybe this is cheating but I want to keep it as a function
 const { allocateFunds } = injectCustomerRepo(customerRepo);
 
-console.log(allocateFunds(depositPlanRepo.getByCustomerId(custWeiJian.id), deposits));
+const result = allocateFunds(depositPlanRepo.getByCustomerId(custWeiJian.id), deposits);
+
+if (result.success) {
+  // Format output to use portfolio names instead of UUID
+  const porfolioAllocationWithNames = Object.fromEntries(
+    [...result.allocations.entries()].map(([portfolioId, amount]) => [
+      portfolioRepo.getById(portfolioId)!.name,
+      amount.toFixed(2),
+    ])
+  );
+  console.log({ ...result, allocations: porfolioAllocationWithNames });
+} else {
+  console.log(result);
+}

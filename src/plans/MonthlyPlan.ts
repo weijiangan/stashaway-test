@@ -1,9 +1,14 @@
 import BigNumber from "bignumber.js";
 import type { IDepositPlan } from "./IDepositPlan";
 import { distributeProportionally } from "../lib/distributeProportionally";
+import { mergeAllocations } from "../lib/mergeAllocations";
 
 export class MonthlyPlan implements IDepositPlan {
+  public type = "MONTHLY" as const;
+
   public customerId: string;
+
+  public priority = 500;
 
   public allocations: Map<string, BigNumber>;
 
@@ -20,14 +25,9 @@ export class MonthlyPlan implements IDepositPlan {
     deposit: BigNumber,
     currentAllocations: Map<string, BigNumber>
   ): { updatedAlloc: Map<string, BigNumber>; remaining: BigNumber } {
-    const weights = new Map<string, BigNumber>(this.allocations);
-    const contributions = distributeProportionally(deposit, weights);
+    const contributions = distributeProportionally(deposit, this.allocations);
+    const finalAllocation = mergeAllocations(currentAllocations, contributions);
 
-    for (const [portfolioId, contribution] of contributions.entries()) {
-      const portfolioAllocation = currentAllocations.get(portfolioId) || new BigNumber(0);
-      currentAllocations.set(portfolioId, portfolioAllocation.plus(contribution));
-    }
-
-    return { updatedAlloc: currentAllocations, remaining: new BigNumber(0) };
+    return { updatedAlloc: finalAllocation, remaining: new BigNumber(0) };
   }
 }

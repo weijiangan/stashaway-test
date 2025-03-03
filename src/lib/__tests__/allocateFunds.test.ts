@@ -19,12 +19,14 @@ describe("allocateFunds", () => {
     return [
       {
         id: "plan1",
+        type: "type1",
         customerId: "customer1",
         isFilled: jest.fn().mockReturnValue(false),
         applyDeposit: jest.fn(),
       } as unknown as IDepositPlan,
       {
         id: "plan2",
+        type: "type2",
         customerId: "customer1",
         isFilled: jest.fn().mockReturnValue(false),
         applyDeposit: jest.fn(),
@@ -45,7 +47,7 @@ describe("allocateFunds", () => {
     const result = allocateFunds([], deposits);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe("No deposit plans found for customer.");
+    expect(result.error).toBe("No deposit plans found for customer. Nothing is allocated");
   });
 
   test("should return error if no valid reference code is found", () => {
@@ -99,8 +101,6 @@ describe("allocateFunds", () => {
       id: "customer1",
     });
 
-    const initialMap = new Map<string, BigNumber>();
-
     (mockPlans[0].applyDeposit as any).mockReturnValue({
       updatedAlloc: new Map([["plan1", new BigNumber(150)]]),
       remaining: new BigNumber(150),
@@ -117,10 +117,12 @@ describe("allocateFunds", () => {
     const result = allocateFunds(mockPlans, deposits);
 
     expect(result.success).toBe(true);
-    expect(result.allocations).toEqual({
-      plan1: "150.00",
-      plan2: "150.00",
-    });
+    expect(result.allocations).toEqual(
+      new Map([
+        ["plan1", new BigNumber(150)],
+        ["plan2", new BigNumber(150)],
+      ])
+    );
   });
 
   test("should skip already filled plans", () => {
@@ -142,8 +144,6 @@ describe("allocateFunds", () => {
     expect(result.success).toBe(true);
     expect(mockPlans[0].applyDeposit).not.toHaveBeenCalled();
     expect(mockPlans[1].applyDeposit).toHaveBeenCalled();
-    expect(result.allocations).toEqual({
-      plan2: "300.00",
-    });
+    expect(result.allocations).toEqual(new Map([["plan2", new BigNumber(300)]]));
   });
 });

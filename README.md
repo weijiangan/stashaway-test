@@ -16,9 +16,9 @@ A couple of assumptions I'd like to lay out:
 
 I don't know if this is the _correct_ way of doing it but I think it will be a good user experience to distribute it proportionately. If we break down the deposits into parts matching the size of the deposit plan and deposit them seprately we will arrive at the same allocation.
 
-I wanted to also have a switch to choose between "smart allocation" and "dumb allocation" so smart would behave like the aforementioned and "dumb" allocation would've allocated extra to a "safe" portfolio that will not lose money or not have interest at all, at least it is safe. However, I did not have enough time to implement this switch.
+I wanted to have a switch to choose between "smart allocation" and "dumb allocation", and the smart would behave like the aforementioned and "dumb" allocation would've allocated extra to a "safe" portfolio that will not lose money or not have interest at all, at least it is safe. However, I did not have enough time to implement this switch. Also ideally I think this is an option the user has to choose when setting up their deposits.
 
-Even though I'm using `bignumber.js`, when dealing with fractions, e.g. when distributing proportionally it is still possible to have rounding and result in unallocated funds. Therefore my strategy is to use subtraction to get the last number in the ratio, that way we will never have underallocations.
+Even though I'm using `bignumber.js`, when dealing with fractions, e.g. when distributing proportionally it is still possible to have rounding and result in unallocated funds. Therefore my strategy is to use subtraction to get the last number in the ratio, that way we will never have under/overallocations.
 
 ## PSA
 
