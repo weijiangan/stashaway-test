@@ -1,0 +1,24 @@
+{
+  "name": "stashaway-assessment",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.1.2",
+    "uuid": "^11.1.0"
+  },
+  "scripts": {
+    "start": "bun run ./src/index.ts",
+    "start:node": "node ./src/index.ts",
+    "test": "bun test",
+    "test:node": "jest"
+  }
+}
