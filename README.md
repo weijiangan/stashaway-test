@@ -23,7 +23,7 @@ Even though I'm using `bignumber.js`, when dealing with fractions, e.g. when dis
 ## PSA
 
 - I don't normally do `as any` in tests but bun test doesn't have `jest.mocked` yet.
-- Sorry I didn't test everything or get 100% coverage. If it's a big deal I can take a little more time to do it
+- Sorry I've opted to test "strategically" and I didn't test all branches or get 100% coverage. If it's a big deal I can take a little more time to do it
 
 ## Instructions to run
 

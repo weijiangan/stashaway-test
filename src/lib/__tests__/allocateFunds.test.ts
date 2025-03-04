@@ -1,3 +1,6 @@
+// Use inline snapshot so I don't need to copy the strings manually
+// I know I should use error codes instead...
+
 import { injectCustomerRepo } from "../allocateFunds";
 import BigNumber from "bignumber.js";
 import type { IDepositPlan } from "../../plans/IDepositPlan";
@@ -38,7 +41,7 @@ describe("allocateFunds", () => {
     const result = allocateFunds(getMockPlans(), []);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe("No deposits provided for allocation.");
+    expect(result.error).toMatchInlineSnapshot(`"No deposits provided for allocation."`);
   });
 
   test("should return error if no customer plans are found", () => {
@@ -47,7 +50,7 @@ describe("allocateFunds", () => {
     const result = allocateFunds([], deposits);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe("No deposit plans found for customer. Nothing is allocated");
+    expect(result.error).toMatchInlineSnapshot(`"No deposit plans found for customer. Nothing is allocated"`);
   });
 
   test("should return error if no valid reference code is found", () => {
@@ -58,7 +61,39 @@ describe("allocateFunds", () => {
     const result = allocateFunds(getMockPlans(), deposits);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe("No valid reference code found in deposits. Nothing will be allocated");
+    expect(result.error).toMatchInlineSnapshot(
+      `"No valid reference code found in deposits. Nothing will be allocated"`
+    );
+  });
+
+  test("should return error if more than 2 plans are passed", () => {
+    const mockPlans = getMockPlans();
+    mockPlans[2] = { ...mockPlans[1], applyDeposit: jest.fn() };
+    const deposits = [
+      { amount: new BigNumber(100), reference: "REF123" },
+      { amount: new BigNumber(200), reference: "REF123" },
+    ];
+
+    (mockCustomerRepo.getByReferenceCode as any).mockReturnValue({
+      id: "customer1",
+    });
+    (mockPlans[0].applyDeposit as any).mockReturnValue({
+      updatedAlloc: new Map([["plan1", new BigNumber(150)]]),
+      remaining: new BigNumber(150),
+    });
+    (mockPlans[1].applyDeposit as any).mockReturnValue({
+      updatedAlloc: new Map([["plan1", new BigNumber(150)]]),
+      remaining: new BigNumber(150),
+    });
+    (mockPlans[2].applyDeposit as any).mockReturnValue({
+      updatedAlloc: new Map([["plan1", new BigNumber(150)]]),
+      remaining: new BigNumber(150),
+    });
+
+    const result = allocateFunds(mockPlans, deposits);
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatchInlineSnapshot(`"Maximum 2 deposit plans are accepted"`);
   });
 
   test("should return error if deposits have different reference codes", () => {
@@ -74,7 +109,7 @@ describe("allocateFunds", () => {
     const result = allocateFunds(getMockPlans(), deposits);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe("Please ensure all deposits have the same reference code.");
+    expect(result.error).toMatchInlineSnapshot(`"Please ensure all deposits have the same reference code."`);
   });
 
   test("should return error if deposit plans do not match customer id", () => {
@@ -87,7 +122,7 @@ describe("allocateFunds", () => {
     const result = allocateFunds(getMockPlans(), deposits);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe("Deposit plans do not match the customer's reference code.");
+    expect(result.error).toMatchInlineSnapshot(`"Deposit plans do not match the customer's reference code."`);
   });
 
   test("should allocate funds successfully across plans", () => {
